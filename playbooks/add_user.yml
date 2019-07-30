@@ -1,0 +1,7 @@
+---
+- hosts: "arkie_engine"
+  gather_facts: false
+
+  tasks:
+  - name: Change password
+    user: name="arkie" password={{ 'Password123' | password_hash('sha512') }}
