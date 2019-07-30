@@ -36,6 +36,9 @@ Options:
         self.__pt.field_names = self.__field_names
 
     def printUsage(self):
+        if len(sys.argv) < 2:
+            print(self.__USAGE)
+            sys.exit(0)
         opts, args = getopt.getopt(sys.argv[1:],"n:r:h",["help"])
         for opt, arg in opts:
             if opt in ['-n']:
