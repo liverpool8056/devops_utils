@@ -1,0 +1,8 @@
+---
+- hosts: "{{grp}}"
+  gather_facts: false
+
+  tasks:
+  - name: Change password
+    user: name={{ item }} password={{ "Password123" | password_hash('sha512') }}
+    with_items: "{{users}}"

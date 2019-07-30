@@ -1,0 +1,4 @@
+- hosts: qingzhou
+  tasks:
+    - name: Modify /etc/hosts
+    - 
