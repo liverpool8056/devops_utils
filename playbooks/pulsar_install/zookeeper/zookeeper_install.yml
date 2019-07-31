@@ -1,0 +1,38 @@
+---
+- hosts: "{{ zk }}"
+  gather_facts: false
+  remote_user: root
+  vars:
+    zoo_port1: 2888
+    zoo_port2: 3888
+    zookeeper_data_dir: /opt/pulsar/data/zookeeper
+  tasks:
+    - name: " copy pulsar pkgs file in hosts "
+      copy:
+        src: /opt/pulsar/apache-pulsar-2.4.0-bin.tar.gz
+        dest: /opt/pulsar/
+        mode: 0644
+
+    - name: " unzip pkgs file in hosts "
+      unarchive: src=/opt/pulsar/apache-pulsar-2.4.0-bin.tar.gz dest=/opt/pulsar/ copy=no
+
+    - name: " rename "
+      shell: mv /opt/pulsar/apache-pulsar-2.4.0 /opt/pulsar/zookeeper-2.4.0
+    
+    - name: " create data_dir "  
+      file:
+        path: "{{ zookeeper_data_dir }}"
+        state: directory
+        mode: 0755  
+
+    - name: " config zookeeper myid "
+      template:
+        src: /root/tools/playbooks/pulsar_install/zookeeper/templates/myid.j2
+        dest: "{{ zookeeper_data_dir }}/myid"
+        mode: 0755
+
+    - name: " config zookeeper "
+      template:
+        src: /root/tools/playbooks/pulsar_install/zookeeper/templates/zookeeper.conf.j2
+        dest: /opt/pulsar/zookeeper-2.4.0/conf/zookeeper.conf
+        mode: 0755
