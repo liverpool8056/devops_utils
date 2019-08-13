@@ -2,6 +2,10 @@
 - hosts: "{{ bk }}"
   gather_facts: false
   remote_user: root
+  vars:
+    zoo_port: 2181
+    bk_journal_dir:  /opt/pulsar/data/bookkeeper/journal
+    bk_ledger_dir: /opt/pulsar/data/bookkeeper/ledger
   tasks:
     - name: "copy pulsar compressed file"
       copy:
@@ -14,3 +18,21 @@
    
     - name: "rename"
       shell: mv /opt/pulsar/apache-pulsar-2.4.0 /opt/pulsar/bookkeeper-2.4.0
+
+    - name: " create bookkeeper journal dir "
+      file:
+        path: "{{ bk_journal_dir }}"
+        state: directory
+        mode: 0755
+
+    - name: " create bookkeeper ledger dir "
+      file:
+        path: "{{ bk_ledger_dir }}"
+        state: directory
+        mode: 0755
+
+    - name: "config bookkeeper "
+      template:
+        src: /root/tools/playbooks/pulsar_install/bookkeeper/templates/bookkeeper.conf.j2
+        dest: /opt/pulsar/bookkeeper-2.4.0/conf/bookkeeper.conf
+        mode: 0755

@@ -2,6 +2,10 @@
 - hosts: "{{ broker }}"
   gather_facts: false
   remote_user: root
+  vars:
+    clusterName: pulsar_cluster
+    bk_journal_dir:  /opt/pulsar/data/bookkeeper/journal
+    bk_ledger_dir: /opt/pulsar/data/bookkeeper/ledger
   tasks:
     - name: "copy pulsar compressed file"
       copy:
@@ -14,3 +18,10 @@
 
     - name: "rename"
       shell: mv /opt/pulsar/apache-pulsar-2.4.0 /opt/pulsar/broker-2.4.0
+
+
+    - name: "config broker "
+      template:
+        src: /root/tools/playbooks/pulsar_install/broker/templates/broker.conf.j2
+        dest: /opt/pulsar/broker-2.4.0/conf/broker.conf
+        mode: 0755

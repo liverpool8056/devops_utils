@@ -6,6 +6,7 @@
     zoo_port1: 2888
     zoo_port2: 3888
     zookeeper_data_dir: /opt/pulsar/data/zookeeper
+    zk_group: "{{ zk }}"
   tasks:
     - name: " copy pulsar pkgs file in hosts "
       copy:
