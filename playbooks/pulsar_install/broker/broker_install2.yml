@@ -1,0 +1,23 @@
+---
+- hosts: "{{ broker }}"
+  gather_facts: false
+  remote_user: root
+  vars:
+    clusterName: pulsar_cluster
+    bk_journal_dir:  /opt/pulsar/data/bookkeeper/journal
+    bk_ledger_dir: /opt/pulsar/data/bookkeeper/ledger
+  tasks:
+    #- name: "test"
+    #  lineinfile:
+    #    dest: /etc/hosts
+    #    line: "{% for host in groups[broker] %}{{ host }} {{ hostvars[host]['hostname'] }} {{ domain}}\n{% endfor %}"
+    
+    - name: "change hostname"
+      raw: "echo {{hostname|quote}} > /etc/hostname"       
+
+    # - name: "lineinfile hosts"
+    #  lineinfile:
+    #    dest: /etc/hosts
+        # line: "{{ ansible_all_ipv4_addresses }} {{ ansible_hostname }} "
+        # line: "{{ groups[broker] | join(inventory_hostname  + '\n') }}{{ inventory_hostname }}" 
+    #    line: "{{ groups[broker] | join(hostvars) }}" i

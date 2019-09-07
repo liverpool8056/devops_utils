@@ -1,7 +1,24 @@
 ---
-- hosts: "arkie_engine"
+- hosts: "ks_tp1"
   gather_facts: false
+
 
   tasks:
   - name: Change password
-    user: name="arkie" password={{ 'Password123' | password_hash('sha512') }}
+    user: name={{ username }} password={{ 'Password123' | password_hash('sha512') }}
+
+  - name: Change sudoer mode600
+    tags:
+    - sudoer
+    file: path=/etc/sudoers mode=600
+
+  - name: Add user to sudoers
+    tags:
+    - sudoer
+    lineinfile: 'path=/etc/sudoers line="{{ username }} ALL=(ALL) NOPASSWD: ALL"'
+  
+  - name: Change sudoer mode400
+    tags:
+    - sudoer
+    file: path=/etc/sudoers mode=400
+  

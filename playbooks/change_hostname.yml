@@ -1,0 +1,27 @@
+---
+- hosts: "{{ group }}"
+  gather_facts: false
+
+  tasks:
+  - name: Change hostname 
+    tags:
+    - hostname
+    lineinfile: path="/etc/hostname" regex='SH' line=vm-{{ ipalias }}.{{idc}}c.local
+
+  - name: Clear hosts-1
+    tags:
+    - hosts
+    - hosts_clear
+    lineinfile: path="/etc/hosts" regex="^$" state="absent"
+
+  - name: Clear hosts-2
+    tags:
+    - hosts
+    - hosts_clear
+    lineinfile: path="/etc/hosts" regex="yumc.it" state="absent"
+
+  - name: Change hosts
+    tags:
+    - hosts
+    - hosts_add
+    lineinfile: path="/etc/hosts" line='{{ ip }} vm{{ ipalias }}.txc.local vm{{ ipalias }}'

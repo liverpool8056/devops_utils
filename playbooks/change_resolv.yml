@@ -1,0 +1,7 @@
+---
+- hosts: tx_tpportal
+  gather_facts: false
+
+  tasks:
+  - name: remove old nameserver
+    copy: src=/bin/kubectl dest=/bin/kubectl

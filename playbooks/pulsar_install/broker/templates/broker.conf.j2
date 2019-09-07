@@ -20,10 +20,10 @@
 ### --- General broker settings --- ###
 
 # Zookeeper quorum connection string
-zookeeperServers={{ groups['pulsar_test'] | join(':2181,') }}:2181
+zookeeperServers={{ groups[broker] | join(':2181,') }}:2181
 
 # Configuration Store connection string
-configurationStoreServers={{ groups['pulsar_test'] | join(':2181,') }}:2181
+configurationStoreServers={{ groups[broker] | join(':2181,') }}:2181
 
 # Broker data port
 brokerServicePort=6650
@@ -41,7 +41,8 @@ webServicePortTls=8443
 bindAddress=0.0.0.0
 
 # Hostname or IP address the service advertises to the outside world. If not set, the value of InetAddress.getLocalHost().getHostName() is used.
-advertisedAddress=
+advertisedAddress={{ ansible_default_ipv4.address }}  
+# advertisedAddress= play_hosts 
 
 
 # Number of threads to use for Netty IO. Default is set to 2 * Runtime.getRuntime().availableProcessors()

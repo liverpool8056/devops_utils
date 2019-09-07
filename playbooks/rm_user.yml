@@ -1,0 +1,9 @@
+---
+- hosts: "{{ grp }}"
+  gather_facts: false
+
+  tasks:
+  - name: Change password
+    user: name={{ item }} state=absent
+    with_items: 
+      - "{{users}}"
