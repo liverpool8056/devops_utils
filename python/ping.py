@@ -2,7 +2,9 @@ import os
 1
 2
 3
+4
 5
+6
 from IPy import IP
 import pprint
 import prettytable
