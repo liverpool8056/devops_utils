@@ -9,8 +9,6 @@ import sys
 import argparse
 import sys
 
-import rebase
-
 class PingTool:
 
     PING_CMD_SET = {
@@ -94,7 +92,8 @@ Options:
         print(self.__pt)
 
     def filter(self):
-        self.result = [ r for r in self.result if r[-1]==self.state ]
+        if self.state != 'all':
+            self.result = [ r for r in self.result if r[-1]==self.state ]
         return self
 
     def probe(self):
@@ -112,12 +111,14 @@ Options:
             time.sleep(1)
         # print(tmp_futures[0].result().read())
         for idx, ip in enumerate(self.IPs):
+            #print('result: %s'%tmp_futures[idx].result().read())
             self.result.append(
                 (
                     ip, 
                     False if self.UNREACHABLE_STRING in tmp_futures[idx].result().read() else True
                 )
             )
+            #print(self.result[idx])
         return self
 
 if __name__ == "__main__":

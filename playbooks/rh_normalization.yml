@@ -1,0 +1,10 @@
+---
+- hosts: "all"
+  gather_facts: false
+  
+  tasks:
+  - name: normalize $PATH
+    lineinfile: dest="/etc/profile" line="export PATH=$PATH:/usr/local/bin"
+
+  - name: normalize HISTORY
+    lineinfile: dest="/etc/profile" regex='^HISTSIZE' line="HISTSIZE=1000"
