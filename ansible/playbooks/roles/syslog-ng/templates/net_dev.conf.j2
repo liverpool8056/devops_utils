@@ -1,0 +1,18 @@
+source s_net_dev {
+    udp(ip(0.0.0.0) port(514));
+};
+
+#Peer
+#destination d_peer { network("10.20.97.101" transport(udp) port(514)); };
+#RiZhiYi
+{% if "oa_shanghai_syslog_ng" in group_names %}
+destination d_rizhiyi { network("{{ d_rizhiyi.shanghai.oa }}" transport(udp) port(514) ); };
+{% elif "oa_fuzhou_syslog_ng" in group_names %}
+destination d_rizhiyi { network("{{ d_rizhiyi.fuzhou.oa }}" transport(udp) port(514) ); };
+{% endif %}
+#local
+destination d_local_file { file("{{ d_local_file }}" ); };
+
+log { source(s_net_dev); destination(d_local_file); };
+log { source(s_net_dev); destination(d_rizhiyi); };
+#log { source(s_net_dev); destination(d_peer); };

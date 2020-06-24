@@ -8,3 +8,39 @@
 
   - name: normalize HISTORY
     lineinfile: dest="/etc/profile" regex='^HISTSIZE' line="HISTSIZE=1000"
+
+  - name: dns
+    lineinfile: dest="/etc/resolv.conf" regex='^nameserver' state="absent"
+    lineinfile: dest="/etc/resolv.conf" line="nameserver 202.96.209.133"
+    lineinfile: dest="/etc/resolv.conf" line="nameserver 210.22.70.3"
+
+  - name: ls_yum_repos_d
+    shell: ls /etc/yum.repos.d/
+    register: repos_file
+
+  - name: remove default repo
+    shell: mv /etc/yum.repos.d/xyzq.repo /etc/yum.repos.d/xyzq.repo.bk
+    when: repos_file.stdout.find('xyzq.repo.bk') == -1
+    #ignore_errors: true
+  
+  - name: add_163_yum_repo
+    copy: src=/etc/yum.repos.d/mirrors.163.com.repo dest=/etc/yum.repos.d/mirrors.163.com.repo
+    when: repos_file.stdout.find('mirrors.163.com.repo') == -1
+    notify: update_yum_cache
+
+  - name: install epel 
+    copy: src=/etc/yum.repos.d/epel.repo dest=/etc/yum.repos.d/epel.repo
+    #yum: name="epel-release"
+    notify: update_yum_cache
+
+  - name: install docker.repo 
+    copy: src=/etc/yum.repos.d/docker-ce.repo dest=/etc/yum.repos.d/docker-ce.repo
+    #yum: name="epel-release"
+    notify: update_yum_cache
+
+  handlers:
+  - name: update_yum_cache
+    shell: "yum clean all&&yum makecache"
+    #docker-ce.repo  epel.repo  epel-testing.repo  mirrors.163.com.repo  redhat.repo  xyzq.repo.bk
+    #copy: src="/etc/yum.repos.d/docker-ce.repo" dest="/etc/yum.repos.d/docker-ce.repo"
+    #copy: src="/etc/yum.repos.d/epel.repo" dest="/etc/yum.repos.d/docker-ce.repo"

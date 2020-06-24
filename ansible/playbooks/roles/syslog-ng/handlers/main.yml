@@ -1,0 +1,2 @@
+- name: enable_start_syslog_ng
+  service: name=syslog-ng state=started enabled=yes

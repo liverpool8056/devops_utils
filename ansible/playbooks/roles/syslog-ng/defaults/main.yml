@@ -1,0 +1,6 @@
+d_rizhiyi:
+  shanghai:
+    oa: "10.20.97.103"
+  fuzhou:
+    oa: "129.25.100.178"
+d_local_file: "/home/data/log/"

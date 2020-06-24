@@ -1,0 +1,10 @@
+- name: stop_rsyslog
+  service: name=rsyslog state=stopped enabled=no
+- name: yum install syslog-ng
+  yum: name=syslog-ng state=present
+  notify: enable_start_syslog_ng
+- name: copy net_dev.conf
+  template: src=net_dev.conf.j2 dest=/etc/syslog-ng/conf.d/net_dev.conf
+  notify: enable_start_syslog_ng
+- name: create /home/data/log dir
+  file: path=/home/data/log state=directory
