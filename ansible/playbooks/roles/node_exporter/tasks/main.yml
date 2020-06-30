@@ -1,0 +1,8 @@
+- name: create prometheus dir
+  file: path=/opt/prometheus/ state=directory
+- name: copy source
+  unarchive: src=/tmp/repository/node_exporter-1.0.1.linux-amd64.tar.gz dest=/opt/prometheus/
+- name: copy service
+  copy: src=/etc/systemd/system/node_exporter.service dest=/etc/systemd/system/node_exporter.service
+- name: install service
+  service: name=node_exporter state=started

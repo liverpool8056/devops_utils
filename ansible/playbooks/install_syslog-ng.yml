@@ -1,3 +1,4 @@
 - hosts: syslog_ng
+  gather_facts: False
   roles: 
   - syslog-ng
