@@ -44,47 +44,51 @@ Options:
     -s              return a subset of ip list. True is for reachable ip, false is for unreachable 
 """
 
-    def __init__(self):
-        self.parser_cli()
-        self.print_args()
+    def __init__(self, netStr, repeat=1, state=True):
+        #self.parser_cli()
+        #self.print_args()
+        self.netStr = netStr
+        self.repeat = repeat
+        self.state = state
+        self.pingCmd = self.PING_CMD.format(repeat=self.repeat, ip='{ip}')
         
         self.IPs = IP(self.netStr)
         self.__pt.field_names = self.__field_names
 
-    def parser_cli(self):
-        if len(sys.argv) < 2:
-            print(self.__USAGE)
-            sys.exit(0)
-        opts, args = getopt.getopt(sys.argv[1:],"n:c:s:h",["help"])
-        for opt, arg in opts:
-            if opt in ['-n']:
-                self.netStr = arg
-            elif "-c" == opt:
-                self.repeat = arg
-                self.pingCmd = self.PING_CMD.format(repeat=arg, ip='{ip}')
-            elif "-s" == opt:
-                if arg == 'true':
-                    self.state = True
-                elif arg == 'false':
-                    self.state = False
-                else:
-                    print(self.__USAGE)
-                    sys.exit(0)
-            elif opt in ["--help", "-h"]:
-                print(self.__USAGE)
-                sys.exit(0)
+    #def parser_cli(self):
+    #    if len(sys.argv) < 2:
+    #        print(self.__USAGE)
+    #        sys.exit(0)
+    #    opts, args = getopt.getopt(sys.argv[1:],"n:c:s:h",["help"])
+    #    for opt, arg in opts:
+    #        if opt in ['-n']:
+    #            self.netStr = arg
+    #        elif "-c" == opt:
+    #            self.repeat = arg
+    #            self.pingCmd = self.PING_CMD.format(repeat=arg, ip='{ip}')
+    #        elif "-s" == opt:
+    #            if arg == 'true':
+    #                self.state = True
+    #            elif arg == 'false':
+    #                self.state = False
+    #            else:
+    #                print(self.__USAGE)
+    #                sys.exit(0)
+    #        elif opt in ["--help", "-h"]:
+    #            print(self.__USAGE)
+    #            sys.exit(0)
 
-    def print_args(self):
-        tmp = ''
-        tmp += 'count: %s\t'%self.repeat
-        tmp += 'network: %s\t'%self.netStr
-        tmp += 'state: %s'%self.state
-        print(tmp)
+    #def print_args(self):
+    #    tmp = ''
+    #    tmp += 'count: %s\t'%self.repeat
+    #    tmp += 'network: %s\t'%self.netStr
+    #    tmp += 'state: %s'%self.state
+    #    print(tmp)
             
-    def getIPs(self):
-        print(self.IPs.len())
-        for ip in self.IPs:
-            print(ip)
+    #def getIPs(self):
+    #    print(self.IPs.len())
+    #    for ip in self.IPs:
+    #        print(ip)
 
     def report(self, state='all'):
         for r in self.result:
@@ -92,8 +96,8 @@ Options:
         print(self.__pt)
 
     def filter(self):
-        if self.state != 'all':
-            self.result = [ r for r in self.result if r[-1]==self.state ]
+        if self.state:
+            self.result = [r for r in self.result if r[-1]]
         return self
 
     def probe(self):
@@ -122,6 +126,5 @@ Options:
         return self
 
 if __name__ == "__main__":
-    # pt = PingTool('172.20.232.0/24')
-    pt = PingTool()
+    pt = PingTool('10.20.97.0/24')
     pt.probe().filter().report()
