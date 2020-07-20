@@ -27,8 +27,6 @@ class PingTool:
     state = 'all'
     netStr = ''
 
-    IPs = None
-    result = []
     __field_names = ['IP', 'isReachable']
     __pt = prettytable.PrettyTable()
     __executor = ThreadPoolExecutor(256)
@@ -52,7 +50,7 @@ Options:
         self.state = state
         self.pingCmd = self.PING_CMD.format(repeat=self.repeat, ip='{ip}')
         
-        self.IPs = IP(self.netStr)
+        self.IPs = IP(self.netStr)[1:-1]
         self.__pt.field_names = self.__field_names
 
     #def parser_cli(self):
@@ -113,16 +111,13 @@ Options:
             else:
                 isFinish = True
             time.sleep(1)
-        # print(tmp_futures[0].result().read())
         for idx, ip in enumerate(self.IPs):
-            #print('result: %s'%tmp_futures[idx].result().read())
             self.result.append(
                 (
                     ip, 
                     False if self.UNREACHABLE_STRING in tmp_futures[idx].result().read() else True
                 )
             )
-            #print(self.result[idx])
         return self
 
 if __name__ == "__main__":
