@@ -1,9 +1,14 @@
 import telnetlib
 import socket
 
-PROMPT_USERNAME = 'sername: '
-PROMPT_PASSWORD = 'assword: '
-
+#PROMPT_USERNAME = ['sername: ', 'ogin: ']
+#PROMPT_USERNAME = ['aa: '.encode(), 'bb: '.encode()]
+PROMPT_USERNAME = ['sername: '.encode(), 'ogin: '.encode()]
+#PROMPT_PASSWORD = ['assword: ']
+PROMPT_PASSWORD = ['assword: '.encode()]
+#PROMPT_RAW = ['#', '>', ']', '$']
+PROMPT_RAW = ['#'.encode(), '>'.encode(), ']'.encode(), '\$'.encode()]
+PROMPT_PREFIX_SUFFIX = '[]#<>$'
 USERNAME_SH = 'xiangwenchao'
 PASSWORD_SH = 'Check1234'
 USERNAME_FZ = 'xiangwc'
@@ -15,34 +20,54 @@ class TelnetClient:
     def __init__(self, host, port=23, timeout=3):
         self.host_info = dict(host=host, port=port)
         self.timeout = timeout
+        self.err_type = None
+        self.hostname = ''
     
-    def connect(self):
+    def comm_connect(self):
         try:
             self.tn = telnetlib.Telnet(Host, port=23, timeout=3)
-        except (socket.timeout, OSError, NameError):
+        except (socket.timeout, OSError, NameError) as e:
             self.tn = None
+            self.err_type = e
             return
 
-        tn.set_debuglevel(0)
-        tn.read_until(PROMPT_USERNAME.encode())
-        tn.write((USERNAME_SH + '\n').encode())
-        tn.read_until(PROMPT_PASSWORD.encode())
-        tn.write((PASSWORD_SH + '\n').encode())
-        tmp_str = tn.read_until('#'.encode())	
-        print(tmp_str.decode().strip())
+        self.tn.set_debuglevel(0)
+        out = self.tn.expect(PROMPT_USERNAME, timeout=self.timeout)
+        if out[0] < 0:
+            self.err_type = 'Unrecognized prompt'
+            self.close()
+            return
+        self.tn.write((USERNAME_SH + '\n').encode())
+        out = self.tn.expect(PROMPT_PASSWORD, timeout=self.timeout)
+        if out[0] < 0:
+            self.err_type = 'Unrecognized prompt'
+            self.close()
+            return
+        self.tn.write((PASSWORD_SH + '\n').encode())
+        out = self.tn.expect(PROMPT_RAW, timeout=self.timeout)	
+        if out[0] < 0:
+            self.err_type = 'Wrong username or password'
+            self.close()
+            return
+        #print(out[2].decode().strip())
+        self.get_raw_name(out[2].decode().strip())
+
+    def get_raw_name(self, prompt):
+        self.hostname= prompt.strip(PROMPT_PREFIX_SUFFIX)
 
     def isConnected(self):
         return True if self.tn else False
 
     def close(self):
         self.tn.close()
+        self.tn = None
 
 if __name__ == '__main__':
-    Host = '1.20.100.80'
-    #Host = '10.20.100.80'
+    #Host = '1.20.100.80'
+    Host = '10.20.100.80'
     tc = TelnetClient(Host)
-    tc.connect()
+    tc.comm_connect()
     if tc.isConnected():
-        print('Success to connect to <{host}>'.format(host=Host))
+        print('Success to connect to <{hostname}({host})>'.format(hostname=tc.hostname, host=Host))
     else: 
-        print('Fail to connect to <{host}>'.format(host=Host))
+        print('Fail to connect to <{hostname}({host})>, err_type is {err_type}'.format(hostname=tc.hostname, host=Host, err_type=tc.err_type))

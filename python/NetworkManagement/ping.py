@@ -24,12 +24,8 @@ class PingTool:
     }
     UNREACHABLE_STRING = UNREACHABLE_STRING_SET[sys.platform]
     repeat = 1
-    state = 'all'
-    netStr = ''
 
     __field_names = ['IP', 'isReachable']
-    __pt = prettytable.PrettyTable()
-    __executor = ThreadPoolExecutor(256)
     __USAGE = """
 PingTool is used to ping all host ip in a specified netwok, and can display a report
 
@@ -49,8 +45,9 @@ Options:
         self.repeat = repeat
         self.state = state
         self.pingCmd = self.PING_CMD.format(repeat=self.repeat, ip='{ip}')
-        
         self.IPs = IP(self.netStr)[1:-1]
+        self.__executor = ThreadPoolExecutor(256)
+        self.__pt = prettytable.PrettyTable()
         self.__pt.field_names = self.__field_names
 
     #def parser_cli(self):
@@ -89,6 +86,7 @@ Options:
     #        print(ip)
 
     def report(self, state='all'):
+        print('Probe for {netStr}, total reachable: {reachableCount}'.format(netStr=self.netStr, reachableCount=len(self.result)))
         for r in self.result:
             self.__pt.add_row(r)
         print(self.__pt)
@@ -97,6 +95,17 @@ Options:
         if self.state:
             self.result = [r for r in self.result if r[-1]]
         return self
+
+    def get_cached(self, netStr):
+        return None
+
+    def reachableIPs(self):
+        cached = self.get_cached(self.netStr)
+        if cached:
+            return cached
+        
+        self.probe()
+        return [str(r[0]) for r in self.result if r[-1]]
 
     def probe(self):
         self.result = []
@@ -122,4 +131,6 @@ Options:
 
 if __name__ == "__main__":
     pt = PingTool('10.20.97.0/24')
+    pt.probe().filter().report()
+    pt = PingTool('192.25.97.0/24')
     pt.probe().filter().report()
