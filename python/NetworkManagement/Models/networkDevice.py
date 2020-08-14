@@ -19,11 +19,15 @@ class xDevice:
         self.comment = comment
         self.credential =credential
         self.status = status
-        self._sysOid = self.__get_sysOid()
+        self.ssh_enabled = ssh_enabled
+        self.telnet_enabled = telnet_enabled
+        self.isICMPReachable = isICMPReachable
+        self.isSNMPReachable = isSNMPReachable
 
         self._redis_conn = redis_conn
     
     def render(self):
+        self._sysOid = self.__get_sysOid()
         if self._sysOid:
             self.isSNMPReachable = True
             oids = self.get_oidlist(self._sysOid)

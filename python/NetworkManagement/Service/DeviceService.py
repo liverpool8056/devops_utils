@@ -39,7 +39,7 @@ class NetworkDeviceService:
     def getAllDevices(self):
         devices = []
         # filter device which is snmpUnreachable
-        device_keys = [ key for key in self.__getDeviceKeys() if not key.endswith(':') ]
+        device_keys = [ key for key in self.__getKeys() if not key.endswith(':') ]
         for key in device_keys:
             device_obj = self.redis_conn.hgetall(key)
             #sysOid = device_obj.get('sysOid', '')
@@ -60,7 +60,7 @@ class NetworkDeviceService:
         return self.redis_conn.hgetall(device_keys[0])
 
     def isExist(self, xDevice):
-        return True if self.__getDeviceKeys() else False
+        return True if self.__getDeviceKeys(xDevice) else False
 
     def delIfExist(self, xDevice):
         keys = self.__getDeviceKeys(xDevice)
