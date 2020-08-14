@@ -39,7 +39,7 @@ Options:
 """
 
     def __init__(self, netStr, repeat=1, state=True):
-        #self.parser_cli()
+        ##self.parser_cli()
         #self.print_args()
         self.netStr = netStr
         self.repeat = repeat
