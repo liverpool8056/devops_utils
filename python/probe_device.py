@@ -13,7 +13,7 @@ if __name__ == '__main__':
     
     for seg in seg_list:
        print(seg.items())
-       if seg.location != location
+       if seg.location != location:
            continue
        pt = PingTool(seg.segment+'/'+str(seg.mask))
        pt.probe().filter()

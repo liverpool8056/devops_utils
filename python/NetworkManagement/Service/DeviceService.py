@@ -63,7 +63,8 @@ class NetworkDeviceService:
         return True if self.__getDeviceKeys() else False
 
     def delIfExist(self, xDevice):
-        keys = self.__getDeviceKeys()
+        keys = self.__getDeviceKeys(xDevice)
+        print(f'delete keys: [{keys}]')
         for key in keys:
             self.redis_conn.delete(key)
 
@@ -78,12 +79,12 @@ class NetworkDeviceService:
         host_channel = Channel(host_ip)
         return host_channel
 
-    def __getKeys(self, xDevice):
-        key = 'networkDevice:{ip}:*'.format(xDevice.managementIP)
+    def __getDeviceKeys(self, xDevice):
+        key = 'networkDevice:{ip}:*'.format(ip=xDevice.managementIP)
         keys = self.redis_conn.keys(key)
         return keys
 
-    def __getDeviceKeys(self):
+    def __getKeys(self):
         return self.redis_conn.keys('networkDevice:*')
 
 if __name__ == '__main__':
