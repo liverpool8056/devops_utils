@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     for d in devices:
         print(type(d.location), d.location)
-        if d.location != location or d.isSNMPReachable !=True:
+        if d.location != location or d.isICMPReachable !=True:
             continue
         host_ip = d.managementIP
         tc = TelnetClient(host_ip)
