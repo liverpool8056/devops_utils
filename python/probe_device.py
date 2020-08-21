@@ -8,7 +8,6 @@ if __name__ == '__main__':
     netDevSvc = NetworkDeviceService()
     seg_list = segSvc.getSegmentByZone('M')
 
-
     location = 'sh'
     
     for seg in seg_list:
@@ -20,6 +19,6 @@ if __name__ == '__main__':
        reachable_ip_list = [ r[0] for r in pt.result ]
        for ip in reachable_ip_list:
            print(ip)
-           d = xDevice(ip, zone=seg.role, location=seg.location)
+           d = xDevice(ip, zone=seg.role, location=seg.location, isICMPReachable=True)
            d.render()
            netDevSvc.save(d)

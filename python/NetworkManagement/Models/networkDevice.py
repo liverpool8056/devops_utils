@@ -1,12 +1,44 @@
 from NetworkManagement.utils.redis_conn import redis_conn
 from NetworkManagement.snmp import NDCollector
+from NetworkManagement.Models.baseModel import BaseModel
 
-class xDevice:
+class BoolChecker:
+
+    def __init__(self, val=False, name='var'):
+        self.name = name
+        self.val = val
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        else:
+            return instance.__dict__[self.name]
+
+    def __set__(self, instance, val):
+        if isinstance(val, bool):
+            instance.__dict__[self.name] = val
+        elif isinstance(val, str):
+            if val == 'True':
+                instance.__dict__[self.name] = True
+            elif val == 'False':
+                instance.__dict__[self.name] = False
+            else:
+                raise AttributeError('Attribute Error, expect type of {attr_name} is \'bool\' or \'str\', but {val_type} received'.format(attr_name=self.name, val_type=type(val)))
+        else:
+            raise AttributeError('Attribute Error, expected type of {attr_name} is \'bool\' or \'str\', but {val_type} received'.format(attr_name=self.name, val_type=type(val)))
+            
+
+class xDevice(BaseModel):
     sysOid = 'SNMPv2-MIB::sysObjectID.0'
+    ssh_enabled = BoolChecker(False, 'ssh_enabled')
+    telnet_enabled = BoolChecker(False, 'telnet_enabled')
+    isICMPReachable = BoolChecker(False, 'isICMPReachable')
+    isSNMPReachable = BoolChecker(False, 'isSNMPReachable')
 
-    def __init__(self, managementIP, name='', secondaryIPs=[], zone='', location='', tags=[], description='', serialNum='', model='', version='', manufacturer='', comment='', credential=None, status='', ssh_enabled=False, telnet_enabled=False, isICMPReachable=False, isSNMPReachable=False, **kwargs):
-        self.name = name 
+    def __init__(self, managementIP, sysOid='', name='', secondaryIPs=[], zone='', location='', tags=[], description='', serialNum='', model='', version='', manufacturer='', comment='', credential=None, status='', ssh_enabled=False, telnet_enabled=False, isICMPReachable=False, isSNMPReachable=False, **kwargs):
         self.managementIP = managementIP
+        self.sysOid = sysOid
+        self.name = name 
         self.secondaryIPs = secondaryIPs
         self.zone = zone
         self.location = location
@@ -27,19 +59,14 @@ class xDevice:
         self._redis_conn = redis_conn
     
     def render(self):
-        self._sysOid = self.__get_sysOid()
-        if self._sysOid:
+        self.sysOid = self.__get_sysOid()
+        if self.sysOid:
             self.isSNMPReachable = True
-            oids = self.get_oidlist(self._sysOid)
+            oids = self.get_oidlist(self.sysOid)
             for key in oids:
                 if key not in ['version', 'name', 'manufacturer', 'model']:
                     continue
                 value = NDCollector.snmp(self.managementIP, oids[key])
-                #if value is None: 
-                    #print('{ip}-{sysoid}-{key}:{oid}'.format(ip=self.managementIP, sysoid=self._sysOid, key=key, oid=oids[key]))
-                 
-                #if 'Unknown Object Identifier' in value:
-                    #print('{ip}-{key}:{oid}'.format(ip=self.managementIP, key=key, oid=oids[key]))
               
                 if key == 'version':
                     self.version = value
@@ -62,7 +89,7 @@ class xDevice:
 
     def get_oidlist(self, sysOid):
         key_patten = 'sysOid:{sysOid}'
-        key = key_patten.format(sysOid=self._sysOid)
+        key = key_patten.format(sysOid=self.sysOid)
         return self._redis_conn.hgetall(key)
 
     def __get_sysOid(self):

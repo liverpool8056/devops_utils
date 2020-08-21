@@ -30,7 +30,7 @@ class TelnetClient:
             #self.tn = telnetlib.Telnet(Host, port=23, timeout=3)
         except (socket.timeout, OSError, NameError) as e:
             self.tn = None
-            self.err_type = e
+            self.err_type = str(e)
             return
 
         self.tn.set_debuglevel(0)
@@ -54,14 +54,27 @@ class TelnetClient:
             self.err_prompt = out[2]
             self.close()
             return
-        #print(out[2].decode().strip())
-        self.get_raw_name(out[2].decode().split('\r\n')[-1].strip())
+        self.hostname = self.get_raw_name()
 
-    def get_raw_name(self, prompt):
-        self.hostname= prompt.strip(PROMPT_PREFIX_SUFFIX)
+    def get_raw_name(self):
+        self.tn.write('\n'.encode())
+        out = self.tn.expect(PROMPT_RAW, timeout=self.timeout)	
+        if out[0] < 0:
+            self.err_prompt = out[2]
+        prompt = out[2].decode().split('\r\n')[-1].strip()
+        return prompt.strip(PROMPT_PREFIX_SUFFIX)
 
     def isConnected(self):
-        return True if self.tn else False
+        if self.tn is None:
+            return False
+        self.tn.write('\n'.encode())
+        out = self.tn.expect(PROMPT_RAW, timeout=self.timeout)	
+        return True if out[0] >= 0 else False
+
+    def send_cmd(self, cmd):
+        self.tn.write((cmd+'\n').encode())
+        out = self.tn.expect(PROMPT_RAW, timeout=self.timeout)	
+        return out[2].decode()
 
     def close(self):
         self.tn.close()

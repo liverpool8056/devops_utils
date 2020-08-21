@@ -10,10 +10,7 @@ if __name__ == '__main__':
 
     location = 'sh'
 
-    print(len(devices))
-
     for d in devices:
-        print(type(d.location), d.location)
         if d.location != location or d.isICMPReachable !=True:
             continue
         host_ip = d.managementIP
@@ -25,6 +22,8 @@ if __name__ == '__main__':
             d.telnet_enabled=True
         else:
             print('{name}({ip}) telnet fail, err: {err}'.format(name=d.name, ip=d.managementIP, err=tc.err_type))
-            if 'Connection refused' in tc.err_type:
-                d.telnet_enabled=True
+            if tc.err_type.find('Connection refused') >= 0 :
+                d.telnet_enabled = False
+            else:
+                d.telnet_enabled = True
         nds.save(d)
