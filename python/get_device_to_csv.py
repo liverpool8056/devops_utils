@@ -21,7 +21,7 @@ if __name__ == '__main__':
     
     #telnet
     #devices = [ d for d in devices if d.telnet_enabled ]
-    #location:sh
-    devices = [ d for d in devices if d.location=='sh' ]
+    #location:fz
+    devices = [ d for d in devices if d.location=='fz' ]
     
     output_csv(devices)
