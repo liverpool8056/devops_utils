@@ -7,7 +7,7 @@ import time
 import getopt
 import sys
 import argparse
-import sys
+import asyncio
 
 class PingTool:
 
@@ -100,37 +100,42 @@ Options:
         return None
 
     def reachableIPs(self):
-        cached = self.get_cached(self.netStr)
-        if cached:
-            return cached
+        #cached = self.get_cached(self.netStr)
+        #if cached:
+            #return cached
         
-        self.probe()
         return [str(r[0]) for r in self.result if r[-1]]
 
+    async def wrapper_popen(self, cmd):
+        return os.popen(cmd)
+
     def probe(self):
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.wrapper_probe())
+        loop.close()
+        return self
+
+    async def wrapper_probe(self):
         self.result = []
-        tmp_futures = []
-        isFinish = False
-        for ip in self.IPs:
-            tmp_futures.append(self.__executor.submit(os.popen, self.pingCmd.format(ip=ip, repeat=self.repeat)))
-        while (not isFinish):
-            for f in tmp_futures:
-                if not f.done():
-                    break
-            else:
-                isFinish = True
-            time.sleep(1)
+        task_result = await asyncio.gather(*[self.wrapper_popen(self.pingCmd.format(ip=ip, repeat=self.repeat)) for ip in self.IPs])
         for idx, ip in enumerate(self.IPs):
             self.result.append(
                 (
                     ip, 
-                    False if self.UNREACHABLE_STRING in tmp_futures[idx].result().read() else True
+                    False if self.UNREACHABLE_STRING in task_result[idx].read() else True
                 )
             )
-        return self
+            #print(task_result[idx].read())
 
 if __name__ == "__main__":
+    #pt = PingTool('10.20.97.0/24')
+    #pt.probe().filter().report()
+    #pt = PingTool('192.25.97.0/24')
+    #pt.probe().filter().report()
+
     pt = PingTool('10.20.97.0/24')
-    pt.probe().filter().report()
-    pt = PingTool('192.25.97.0/24')
-    pt.probe().filter().report()
+    t1 = time.time()
+    pt.probe()
+    t2 = time.time()
+    print(t2-t1)
+
