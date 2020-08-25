@@ -16,7 +16,7 @@ class Segment(BaseModel):
         self.location = location
         self.tags = tags
 
-    def getIPList(self):
+    def get_hosts(self):
         ips = []
         segment_mask = '{segment}/{mask}'.format(segment=self.segment, mask=self.mask)
         seg = IP(segment_mask)

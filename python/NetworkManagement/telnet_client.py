@@ -1,13 +1,14 @@
 import telnetlib
 import socket
+import re
 
 #PROMPT_USERNAME = ['sername: ', 'ogin: ']
 #PROMPT_USERNAME = ['aa: '.encode(), 'bb: '.encode()]
 PROMPT_USERNAME = ['sername: '.encode(), 'ogin: '.encode(), 'sername:'.encode()]
 #PROMPT_PASSWORD = ['assword: ']
 PROMPT_PASSWORD = ['assword: '.encode(), 'assword:'.encode()]
-#PROMPT_RAW = ['#', '>', ']', '$']
-PROMPT_RAW = ['#'.encode(), '>'.encode(), ']'.encode(), '\$'.encode()]
+PROMPT_RAW = ['#', '>', ']', '$']
+PROMPT_RAW_B = ['#'.encode(), '>'.encode(), ']'.encode(), '\$'.encode()]
 PROMPT_PREFIX_SUFFIX = '[]#<>$'
 USERNAME_SH = 'xiangwenchao'
 PASSWORD_SH = 'Check1234'
@@ -48,17 +49,20 @@ class TelnetClient:
             self.close()
             return
         self.tn.write((PASSWORD_SH + '\n').encode())
-        out = self.tn.expect(PROMPT_RAW, timeout=self.timeout)	
+        out = self.tn.expect(PROMPT_RAW_B, timeout=self.timeout)	
         if out[0] < 0:
             self.err_type = 'Wrong username or password'
             self.err_prompt = out[2]
             self.close()
             return
         self.hostname = self.get_raw_name()
+        self.raw_prompt = [re.compile(r"{hostname}.*{prompt}".format(hostname=self.hostname, prompt=_).encode()) for _ in PROMPT_RAW]
+        for _ in self.raw_prompt:
+            print(type(self.raw_prompt[0]))
 
     def get_raw_name(self):
         self.tn.write('\n'.encode())
-        out = self.tn.expect(PROMPT_RAW, timeout=self.timeout)	
+        out = self.tn.expect(PROMPT_RAW_B, timeout=self.timeout)	
         if out[0] < 0:
             self.err_prompt = out[2]
         prompt = out[2].decode().split('\r\n')[-1].strip()
@@ -68,12 +72,14 @@ class TelnetClient:
         if self.tn is None:
             return False
         self.tn.write('\n'.encode())
-        out = self.tn.expect(PROMPT_RAW, timeout=self.timeout)	
+        out = self.tn.expect(PROMPT_RAW_B, timeout=self.timeout)	
         return True if out[0] >= 0 else False
 
     def send_cmd(self, cmd):
         self.tn.write((cmd+'\n').encode())
-        out = self.tn.expect(PROMPT_RAW, timeout=self.timeout)	
+        #out = self.tn.expect([re.compile('#'.encode())], timeout=self.timeout)
+        out = self.tn.expect(self.raw_prompt, timeout=self.timeout)
+        #out = self.tn.expect(PROMPT_RAW_B, timeout=self.timeout)
         return out[2].decode()
 
     def close(self):

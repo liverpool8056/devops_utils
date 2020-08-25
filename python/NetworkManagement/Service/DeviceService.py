@@ -57,7 +57,10 @@ class NetworkDeviceService:
 
     def getDeviceByIP(self, managementIP):
         device_keys = self.redis_conn.keys('networkDevice:'+managementIP+':*')
-        assert len(device_keys) == 0
+        try:
+            assert len(device_keys) == 1
+        except:
+            raise AssertionError('Find more than one index: %s'%'networkDevice:'+managementIP+':*')
         return self.redis_conn.hgetall(device_keys[0])
 
     def isExist(self, xDevice):
