@@ -6,6 +6,9 @@ class LoginError(Exception):
 class DeviceInfoDisMatch(Exception):
     pass
 
+class ConfigError(Exception):
+    pass
+
 class ControllerFactory:
 
     def __init__(self):
@@ -25,25 +28,28 @@ class Controller:
         self.channel = None
         self.isLastCmdSuccess = False
         self.lastPrompt = None
+        self.managementIP = None
         self.cxt = []
 
     def __telnet(self, managementIP):
+        self.managementIP = managementIP
         tc = TelnetClient(managementIP)
         tc.comm_connect()
         if tc.isConnected() == False:
-            raise LoginError('LoginError, err_msg is {err_msg}'.format(err_msg=tc.err_type))
+            raise LoginError('LoginError, cannot login to {managementIP} err_msg is {err_msg}'.format(managementIP=managementIP, err_msg=tc.err_type))
         return tc
 
     def __ssh(self):
         pass
 
     def login(self, xDevice):
-        #if xDevice.telnet_enabled:
+        if self.isAlive():
+            return
         self.channel = self.__telnet(xDevice.managementIP)
-        #print('login success')
 
     def logoff(self):
         self.channel.close()
+        self.channel = None
 
     def isAlive(self):
         return True if self.channel else False
@@ -61,16 +67,17 @@ class Controller:
 
 class IOSController(Controller):
 
-    def __init__(self):
-        super(Controller, self).__init__()
+    #def __init__(self):
+    #    super(Controller, self).__init__()
 
     def checkPromptSuccess(self, cmd, prompt):
         self.isLastCmdSuccess = False if prompt.find('^') >= 0 else True
         try:
             assert self.isLastCmdSuccess == True
-        except AssertionError:
-            err_msg = 'ConfigError, cmd is {cmd}, prompt is {prompt}'.format(cmd=line, prompt=self.lastPrompt)
-            raise ConfigError(err_msg)
+        except AssertionError as e:
+            err_msg = 'ConfigError, something wrong happened when config for {managementIP}, cmd is: \'{cmd}\'\nprompt is:\n{prompt}'.format(managementIP=self.managementIP, cmd=cmd, prompt=self.lastPrompt)
+            self.logoff()
+            raise ConfigError(err_msg) from e
 
     def terLen(self):
         cmd = 'ter len 0'
@@ -83,6 +90,11 @@ class IOSController(Controller):
         self.checkPromptSuccess(cmd, self.lastPrompt)
         return self.lastPrompt
 
+    def config_txt(self, lines):
+        for cmd in lines:
+            self.lastPrompt = self.channel.send_cmd(cmd)
+            self.checkPromptSuccess(cmd, self.lastPrompt)
+    
     def config_syslog(self):
         config_txt = [
         "conf t",
@@ -104,14 +116,19 @@ class IOSController(Controller):
 
 class NexusController(Controller):
 
-    def __init__(self):
-        super(Controller, self).__init__()
+    #def __init__(self):
+    #    super(Controller, self).__init__()
 
     def terLen(self):
         cmd = 'ter len 0'
         self.lastPrompt = self.channel.send_cmd(cmd)
         self.checkPromptSuccess(cmd, self.lastPrompt)
 
+    def config_txt(self, lines):
+        for cmd in lines:
+            self.lastPrompt = self.channel.send_cmd(cmd)
+            self.checkPromptSuccess(cmd, self.lastPrompt)
+    
     def get_config_syslog(self):
         cmd = 'sh run | in logging'
         self.lastPrompt = self.channel.send_cmd(cmd)
@@ -122,11 +139,13 @@ class NexusController(Controller):
         self.isLastCmdSuccess = False if prompt.find('^') >= 0 else True
         try:
             assert self.isLastCmdSuccess == True
-        except AssertionError:
-            err_msg = 'ConfigError, cmd is {cmd}, prompt is {prompt}'.format(cmd=line, prompt=self.lastPrompt)
-            raise ConfigError(err_msg)
+        except AssertionError as e:
+            err_msg = 'ConfigError, something wrong happened when config for {managementIP}, cmd is: \'{cmd}\'\nprompt is:\n{prompt}'.format(managementIP=self.managementIP, cmd=cmd, prompt=self.lastPrompt)
+            self.logoff()
+            raise ConfigError(err_msg) from e
 
 class Cisco37Controller(IOSController):
 
-    def __init__(self):
-        super(IOSController, self).__init__()
+    #def __init__(self):
+    #    super(IOSController, self).__init__()
+    pass

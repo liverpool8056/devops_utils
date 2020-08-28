@@ -10,15 +10,17 @@ PROMPT_PASSWORD = ['assword: '.encode(), 'assword:'.encode()]
 PROMPT_RAW = ['#', '>', ']', '$']
 PROMPT_RAW_B = ['#'.encode(), '>'.encode(), ']'.encode(), '\$'.encode()]
 PROMPT_PREFIX_SUFFIX = '[]#<>$'
-USERNAME_SH = 'xiangwenchao'
-PASSWORD_SH = 'Check1234'
+USERNAME_SH = 'admin'
+PASSWORD_SH = 'wiscom@sh'
+#USERNAME_SH = 'xiangwenchao'
+#PASSWORD_SH = 'Check1234'
 USERNAME_FZ = 'xiangwc'
 PASSWORD_FZ = 'QWERasdf1234=-'
 
 
 class TelnetClient:
     
-    def __init__(self, host, port=23, timeout=5):
+    def __init__(self, host, port=23, timeout=10):
         self.host_info = dict(host=host, port=port)
         self.timeout = timeout
         self.err_type = None
@@ -57,8 +59,6 @@ class TelnetClient:
             return
         self.hostname = self.get_raw_name()
         self.raw_prompt = [re.compile(r"{hostname}.*{prompt}".format(hostname=self.hostname, prompt=_).encode()) for _ in PROMPT_RAW]
-        for _ in self.raw_prompt:
-            print(type(self.raw_prompt[0]))
 
     def get_raw_name(self):
         self.tn.write('\n'.encode())
@@ -80,6 +80,7 @@ class TelnetClient:
         #out = self.tn.expect([re.compile('#'.encode())], timeout=self.timeout)
         out = self.tn.expect(self.raw_prompt, timeout=self.timeout)
         #out = self.tn.expect(PROMPT_RAW_B, timeout=self.timeout)
+        #print('matched index is:%s, out is:%s'%(out[0], out[2].decode()))
         return out[2].decode()
 
     def close(self):

@@ -135,7 +135,7 @@ if __name__ == "__main__":
 
     pt = PingTool('10.20.97.0/24')
     t1 = time.time()
-    pt.probe()
+    pt.probe().filter().report()
     t2 = time.time()
     print(t2-t1)
 
