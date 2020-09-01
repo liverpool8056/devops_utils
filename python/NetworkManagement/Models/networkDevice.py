@@ -60,7 +60,7 @@ class xDevice(BaseModel):
 
     def __snmp_oids(self, oids):
         oids = oids.split(',')
-        for oid in odis:
+        for oid in oids:
             value = NDCollector.snmp(self.managementIP, oid.strip())
             if value:
                 return value
@@ -73,7 +73,7 @@ class xDevice(BaseModel):
             for key in oids:
                 if key not in ['version', 'name', 'manufacturer', 'model']:
                     continue
-                value = self.__snmp_oids(oids)
+                value = self.__snmp_oids(oids[key])
               
                 if key == 'version':
                     self.version = value
@@ -82,7 +82,7 @@ class xDevice(BaseModel):
                 elif key == 'model':
                     self.model = value
                 elif key == 'manufacturer':
-                    self.manufacturer = value
+                    self.manufacturer = value.split(',')[0].strip()
 
     def to_redis_value(self):
         ret = dict()
