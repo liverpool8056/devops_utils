@@ -36,7 +36,7 @@ class NDCollector:
     def snmp(ip, oid):
         f = os.popen(NDCollector.snmp_cmd.format(ip=ip, oid=oid))
         oid_v = f.read().strip().strip('"')
-        return None if "Timeout" in oid_v or len(oid_v) == 0 else oid_v
+        return None if "Timeout" in oid_v or len(oid_v) == 0 or oid_v.lower().find("no such")>=0 else oid_v
 
 if __name__ == "__main__":
     oids = [

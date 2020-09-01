@@ -27,20 +27,13 @@ class NetworkDeviceService:
             sysOid = device_obj.get('sysOid', '')
             if sysOid != sysoid:
                 continue
-            if 'managementIP' in device_obj.keys():
-                man_ip = device_obj['managementIP']
-            else:
-                man_ip = device_obj['ip']
-                device_obj.update(dict(managementIP=man_ip))
-                del device_obj['ip']
             devices.append(xDevice(**device_obj))
         return devices
 
     def getAllDevices(self, known=True):
         devices = []
         # filter device which is snmpUnreachable
-        if known:
-            device_keys = [ key for key in self.__getKeys() if not key.endswith(':') ]
+        device_keys = [ key for key in self.__getKeys() if not key.endswith(':') ] if known else self.__getKeys()
         for key in device_keys:
             device_obj = self.redis_conn.hgetall(key)
             #sysOid = device_obj.get('sysOid', '')

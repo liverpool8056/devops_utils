@@ -57,7 +57,14 @@ class xDevice(BaseModel):
         self.isSNMPReachable = isSNMPReachable
 
         self._redis_conn = redis_conn
-    
+
+    def __snmp_oids(self, oids):
+        oids = oids.split(',')
+        for oid in odis:
+            value = NDCollector.snmp(self.managementIP, oid.strip())
+            if value:
+                return value
+
     def render(self):
         self.sysOid = self.__get_sysOid()
         if self.sysOid:
@@ -66,7 +73,7 @@ class xDevice(BaseModel):
             for key in oids:
                 if key not in ['version', 'name', 'manufacturer', 'model']:
                     continue
-                value = NDCollector.snmp(self.managementIP, oids[key])
+                value = self.__snmp_oids(oids)
               
                 if key == 'version':
                     self.version = value
