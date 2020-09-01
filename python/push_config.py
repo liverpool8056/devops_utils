@@ -1,6 +1,12 @@
 from NetworkManagement.Controllers.controller import ControllerFactory
 from NetworkManagement.Service.DeviceService import NetworkDeviceService
 
+def print_resp(host, resp_dict):
+    print(f'{host}')
+    for cmd in resp_dict:
+        resp = resp_dict.get(cmd, 'No Response')
+        print(f'\t{cmd}\n\t{resp}')
+    print('-'*20)
 
 def get_devices(iplist):
     nds = NetworkDeviceService()
@@ -29,6 +35,13 @@ def logoff_devices(controllers):
         controller.logoff()
     return controllers
 
+def get_cmd_reps(controller, cmds):
+    ret = dict()
+    for cmd in cmds:
+        resp = controller.send_cmd(cmd)
+        ret.update({cmd:resp})
+    return ret 
+
 def get_config(controllers):
     for controller in controllers:
         config_syslog = controller.get_config_syslog()
@@ -45,11 +58,17 @@ def push_config(controllers):
         #'logging buffered 409600',
         #'logging console emergencies',
         #'hw-switch switch 1 logging onboard message level 3',
-        'logging source-interface Vlan999',
-        'logging server 10.20.97.99',
+        #'logging source-interface Vlan999',
+        #'logging server 10.20.97.99',
         #'logging host 10.20.97.99',
+        'logging trap warnings',
+        'logging source-interface Vlan254',
+        'logging 129.25.98.33',
+        #'no logging host 10.20.97.99',
+
         'exit',
-        'copy run start'
+        #'copy run start'
+        'wr'
     ]
     
     for c in controllers:
@@ -60,14 +79,24 @@ def push_config(controllers):
 if __name__ == '__main__':
 
     ips = [
-        '10.20.103.100',
-        '10.20.103.101',
-        '10.20.103.102'
-
+'192.168.254.11',
+'192.168.254.12',
+'192.168.254.21',
+'192.168.254.24',
+'192.168.254.25',
+'192.168.254.23',
+'192.168.254.41',
+#192.168.254.51',
+'192.168.254.42'
     ]
 
     devices = get_devices(ips)
     controllers = login_devices(devices)
-    push_config(controllers)
+    #push_config(controllers)
     get_config(controllers)
+    #cmds = ['sh ip int b | in Vlan']
+    #for controller in controllers:
+    #    resp_dict = get_cmd_reps(controller, cmds)
+    #    host = controller.channel.host_info['host']
+    #    print_resp(host, resp_dict)
     logoff_devices(controllers)

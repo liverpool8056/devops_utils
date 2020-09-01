@@ -57,6 +57,10 @@ class Controller:
     def get_raw_name(self):
         return self.channel.get_raw_name()
 
+    def send_cmd(self, cmd):
+        self.lastPrompt = self.channel.send_cmd(cmd)
+        return self.lastPrompt
+
     def config_error(self):
         cmd = 'error_cmd'
         self.lastPrompt = self.channel.send_cmd(cmd)

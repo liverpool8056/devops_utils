@@ -10,12 +10,14 @@ PROMPT_PASSWORD = ['assword: '.encode(), 'assword:'.encode()]
 PROMPT_RAW = ['#', '>', ']', '$']
 PROMPT_RAW_B = ['#'.encode(), '>'.encode(), ']'.encode(), '\$'.encode()]
 PROMPT_PREFIX_SUFFIX = '[]#<>$'
-USERNAME_SH = 'admin'
-PASSWORD_SH = 'wiscom@sh'
+#USERNAME_SH = 'admin'
+#PASSWORD_SH = 'wiscom@sh'
+USERNAME_SH = 'xiangwc'
+PASSWORD_SH = 'QWERasdf1234=-'
 #USERNAME_SH = 'xiangwenchao'
 #PASSWORD_SH = 'Check1234'
-USERNAME_FZ = 'xiangwc'
-PASSWORD_FZ = 'QWERasdf1234=-'
+#USERNAME_FZ = 'xiangwc'
+#PASSWORD_FZ = 'QWERasdf1234=-'
 
 
 class TelnetClient:
@@ -58,7 +60,7 @@ class TelnetClient:
             self.close()
             return
         self.hostname = self.get_raw_name()
-        self.raw_prompt = [re.compile(r"{hostname}.*{prompt}".format(hostname=self.hostname, prompt=_).encode()) for _ in PROMPT_RAW]
+        self.raw_prompt = [re.compile(r"{hostname}.*{prompt}".format(hostname=self.hostname[:20], prompt=_).encode()) for _ in PROMPT_RAW]
 
     def get_raw_name(self):
         self.tn.write('\n'.encode())
@@ -78,7 +80,7 @@ class TelnetClient:
     def send_cmd(self, cmd):
         self.tn.write((cmd+'\n').encode())
         #out = self.tn.expect([re.compile('#'.encode())], timeout=self.timeout)
-        out = self.tn.expect(self.raw_prompt, timeout=self.timeout+100)
+        out = self.tn.expect(self.raw_prompt, timeout=self.timeout+20)
         #out = self.tn.expect(PROMPT_RAW_B, timeout=self.timeout)
         #print('matched index is:%s, out is:%s'%(out[0], out[2].decode()))
         return out[2].decode()
@@ -88,12 +90,21 @@ class TelnetClient:
         self.tn = None
 
 if __name__ == '__main__':
-    #Host = '1.20.100.80'
-    Host = '10.20.100.92'
+    Host = '172.25.254.148'
+    cmds = [
+        'conf t',
+        'logging source-interface Vlan666',
+        'logging 129.25.98.33',
+        'logging trap warnings',
+        'exit',
+        'wr'
+    ]
     tc = TelnetClient(Host)
     tc.comm_connect()
     if tc.isConnected():
         print('Success to connect to {hostname}({host})'.format(hostname=tc.hostname, host=Host))
+        for cmd in cmds:
+            tc.send_cmd(cmd)
         tc.close()
     else: 
         print('Fail to connect to {hostname}({host}), err_type is {err_type}, err_prompt is {err_prompt}'.format(hostname=tc.hostname, host=Host, err_type=tc.err_type, err_prompt=tc.err_prompt))
