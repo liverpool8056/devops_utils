@@ -83,6 +83,18 @@ class IOSController(Controller):
             self.logoff()
             raise ConfigError(err_msg) from e
 
+    def enable(self, passwd):
+        prompt = self.channel.send_cmd('en')
+        try:
+            assert prompt.strip().endswith(':')
+        except AssertionError as e:
+            raise EnableError('{host}: unknown enable'.format(host=self.managementIP)) from e 
+        prompt = self.channel.send_cmd(passwd)
+        try:
+            assert prompt.strip().endswith('#')
+        except AssertionError as e:
+            raise EnableError('{host}: password error'.format(host=self.managementIP)) from e
+
     def terLen(self):
         cmd = 'ter len 0'
         self.lastPrompt = self.channel.send_cmd(cmd)
