@@ -35,10 +35,11 @@ class xDevice(BaseModel):
     isICMPReachable = BoolChecker(False, 'isICMPReachable')
     isSNMPReachable = BoolChecker(False, 'isSNMPReachable')
 
-    def __init__(self, managementIP, sysOid='', name='', secondaryIPs=[], zone='', location='', tags=[], description='', serialNum='', model='', version='', manufacturer='', comment='', credential=None, status='', ssh_enabled=False, telnet_enabled=False, isICMPReachable=False, isSNMPReachable=False, **kwargs):
+    def __init__(self, managementIP, sysOid='', name='', deviceType='', secondaryIPs=[], zone='', location='', tags=[], description='', serialNum='', model='', version='', manufacturer='', comment='', credential=None, status='', ssh_enabled=False, telnet_enabled=False, isICMPReachable=False, isSNMPReachable=False, **kwargs):
         self.managementIP = managementIP
         self.sysOid = sysOid
         self.name = name 
+        self.deviceType = deviceType
         self.secondaryIPs = secondaryIPs
         self.zone = zone
         self.location = location
@@ -69,11 +70,13 @@ class xDevice(BaseModel):
         self.sysOid = self.__get_sysOid()
         if self.sysOid:
             self.isSNMPReachable = True
-            oids = self.get_oidlist(self.sysOid)
-            for key in oids:
-                if key not in ['version', 'name', 'manufacturer', 'model']:
-                    continue
-                value = self.__snmp_oids(oids[key])
+            oid_dict = self.get_oidlist(self.sysOid)
+            for key in oid_dict:
+                if key in ['version', 'name', 'manufacturer', 'model']:
+                   value = self.__snmp_oids(oid_dict[key])
+                elif key in ['deviceType']:
+                    #print('deviceType: {type}'.format(type=oid_dict[key]))
+                    self.__dict__[key] = oid_dict[key]
               
                 if key == 'version':
                     self.version = value

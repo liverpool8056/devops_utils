@@ -12,10 +12,10 @@ PROMPT_RAW_B = ['#'.encode(), '>'.encode(), ']'.encode(), '\$'.encode()]
 PROMPT_PREFIX_SUFFIX = '[]#<>$'
 #USERNAME_SH = 'admin'
 #PASSWORD_SH = 'wiscom@sh'
-USERNAME_SH = 'xiangwc'
-PASSWORD_SH = 'QWERasdf1234=-'
-#USERNAME_SH = 'xiangwenchao'
-#PASSWORD_SH = 'Check1234'
+#USERNAME_SH = 'xiangwc'
+#PASSWORD_SH = 'QWERasdf1234=-'
+USERNAME_SH = 'xiangwenchao'
+PASSWORD_SH = 'Check1234'
 #USERNAME_FZ = 'xiangwc'
 #PASSWORD_FZ = 'QWERasdf1234=-'
 
@@ -82,7 +82,7 @@ class TelnetClient:
 
     def send_cmd(self, cmd):
         self.tn.write((cmd+'\n').encode())
-        if isEnable(cmd):
+        if self.isEnable(cmd):
             out = self.tn.expect(PROMPT_PASSWORD, timeout=self.timeout)
         else:
             #out = self.tn.expect([re.compile('#'.encode())], timeout=self.timeout)

@@ -79,19 +79,13 @@ def push_config(controllers):
 if __name__ == '__main__':
 
     ips = [
-'192.168.254.11',
-'192.168.254.12',
-'192.168.254.21',
-'192.168.254.24',
-'192.168.254.25',
-'192.168.254.23',
-'192.168.254.41',
-#192.168.254.51',
-'192.168.254.42'
+'172.98.254.122'
     ]
 
     devices = get_devices(ips)
     controllers = login_devices(devices)
+    controller = controllers[0]
+    controller.enable('xycisco')
     #push_config(controllers)
     get_config(controllers)
     #cmds = ['sh ip int b | in Vlan']
