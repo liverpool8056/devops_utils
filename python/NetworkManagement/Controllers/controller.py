@@ -1,4 +1,5 @@
 from NetworkManagement.telnet_client import TelnetClient
+from NetworkManagement.Models.deviceConfig import DeviceConfig
 
 class LoginError(Exception):
     pass
@@ -47,8 +48,11 @@ class Controller:
 
     def login(self, xDevice):
         if self.isAlive():
-            return
+            return True
+        if xDevice.telnet_enabled == False and xDevice.ssh_enabled == False:
+            return False
         self.channel = self.__telnet(xDevice.managementIP)
+        return True
 
     def logoff(self):
         self.channel.close()
@@ -63,6 +67,9 @@ class Controller:
     def send_cmd(self, cmd):
         self.lastPrompt = self.channel.send_cmd(cmd)
         return self.lastPrompt
+
+    def get_config_all(self):
+        pass
 
     def config_error(self):
         cmd = 'error_cmd'
@@ -113,7 +120,14 @@ class IOSController(Controller):
         for cmd in lines:
             self.lastPrompt = self.channel.send_cmd(cmd)
             self.checkPromptSuccess(cmd, self.lastPrompt)
-    
+
+    def get_config_all(self):
+        self.terLen()
+        cmd = 'sh run'
+        self.send_cmd(cmd)
+        self.checkPromptSuccess(cmd, self.lastPrompt)
+        return DeviceConfig(owner=self.managementIP, value=self.lastPrompt)
+        
     def config_syslog(self):
         config_txt = [
         "conf t",

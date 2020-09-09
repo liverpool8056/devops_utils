@@ -1,7 +1,7 @@
 from NetworkManagement.Service.DeviceService import NetworkDeviceService
 
 def get_incomplete_device(devices, location='sh'):
-    return [ d for d in devices if (d.sysOid!= 'None' or d.sysOid!='') and d.model.find('No ')>= 0 and d.location==location ]
+    return [ d for d in devices if (d.sysOid!= 'None' or d.sysOid!='') and (d.model.find('No ')>= 0 or d.model=='None' or d.model=='') and d.location==location ]
 
 def get_sysOid_set(devices):
     sysOid_dict = dict()
