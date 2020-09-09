@@ -77,11 +77,17 @@ class TelnetClient:
         out = self.tn.expect(PROMPT_RAW_B, timeout=self.timeout)	
         return True if out[0] >= 0 else False
 
+    def isEnable(self, cmd):
+        return cmd in ['en']
+
     def send_cmd(self, cmd):
         self.tn.write((cmd+'\n').encode())
-        #out = self.tn.expect([re.compile('#'.encode())], timeout=self.timeout)
-        out = self.tn.expect(self.raw_prompt, timeout=self.timeout+20)
-        #out = self.tn.expect(PROMPT_RAW_B, timeout=self.timeout)
+        if self.isEnable(cmd):
+            out = self.tn.expect(PROMPT_PASSWORD, timeout=self.timeout)
+        else:
+            #out = self.tn.expect([re.compile('#'.encode())], timeout=self.timeout)
+            out = self.tn.expect(self.raw_prompt, timeout=self.timeout+20)
+            #out = self.tn.expect(PROMPT_RAW_B, timeout=self.timeout)
         #print('matched index is:%s, out is:%s'%(out[0], out[2].decode()))
         return out[2].decode()
 

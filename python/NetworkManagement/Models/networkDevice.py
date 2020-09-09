@@ -82,7 +82,9 @@ class xDevice(BaseModel):
                 elif key == 'model':
                     self.model = value
                 elif key == 'manufacturer':
-                    self.manufacturer = value.split(',')[0].strip()
+                    value = NDCollector.snmp(self.managementIP, 'SNMPv2-MIB::sysDescr.0') if value is None else value
+                    value = value.split(',')[0].strip() if value else value
+                    self.manufacturer = value
 
     def to_redis_value(self):
         ret = dict()
