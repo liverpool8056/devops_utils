@@ -48,11 +48,11 @@ class Controller:
 
     def login(self, xDevice):
         if self.isAlive():
-            return True
+            return
         if xDevice.telnet_enabled == False and xDevice.ssh_enabled == False:
-            return False
+            raise LoginError('{host} telnet_enable is False and ssh_enable is False'.format(host=xDevice.managementIP))
+           
         self.channel = self.__telnet(xDevice.managementIP)
-        return True
 
     def logoff(self):
         self.channel.close()
